@@ -1,4 +1,4 @@
-name: Deploy React App to S3
+name: Deploy Vite App to S3
 
 on:
   push:
@@ -9,11 +9,15 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: Tip-Calculator
+
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -21,10 +25,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build React App
+      - name: Build Vite app
         run: npm run build
 
-      - name: Configure AWS Credentials
+      - name: Verify dist folder
+        run: ls -la dist
+
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -32,4 +39,4 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Deploy to S3
-        run: aws s3 sync build/ s3://${{ secrets.AWS_S3_BUCKET }} --delete
+        run: aws s3 sync dist/ s3://${{ secrets.AWS_S3_BUCKET }} --delete
